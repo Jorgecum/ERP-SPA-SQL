@@ -496,7 +496,7 @@
                         ${filteredProducts.map(p => {
                             let statusText = 'Normal';
                             let badgeClass = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
-                            if (p.stock === 0) {
+                            if (p.stock == null || p.stock === 0) {
                                 statusText = 'Crítico';
                                 badgeClass = 'bg-red-500/20 text-red-400 border border-red-500/30';
                             } else if (p.stock <= p.minStock) {

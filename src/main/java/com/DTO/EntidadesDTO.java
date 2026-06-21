@@ -2,26 +2,26 @@ package com.DTO;
 
 public class EntidadesDTO {
 
-    private int idEntidad;
+    private Integer idEntidad;
     private String nombre_RazonSocial;
     private String tipoDocumento;
     private String numeroDocumento;
     private String direccion;
     private String telefono;
     private String email;
-    private int idEstado;
+    private Integer idEstado;
     private String nombreEstado;
-    private int idTipoEntidad;
+    private Integer idTipoEntidad;
     private String nombreTipoEntidad;
 
     public EntidadesDTO() {
     }
 
-    public int getIdEntidad() {
+    public Integer getIdEntidad() {
         return idEntidad;
     }
 
-    public void setIdEntidad(int idEntidad) {
+    public void setIdEntidad(Integer idEntidad) {
         this.idEntidad = idEntidad;
     }
 
@@ -73,11 +73,11 @@ public class EntidadesDTO {
         this.email = email;
     }
 
-    public int getIdEstado() {
+    public Integer getIdEstado() {
         return idEstado;
     }
 
-    public void setIdEstado(int idEstado) {
+    public void setIdEstado(Integer idEstado) {
         this.idEstado = idEstado;
     }
 
@@ -89,11 +89,11 @@ public class EntidadesDTO {
         this.nombreEstado = nombreEstado;
     }
 
-    public int getIdTipoEntidad() {
+    public Integer getIdTipoEntidad() {
         return idTipoEntidad;
     }
 
-    public void setIdTipoEntidad(int idTipoEntidad) {
+    public void setIdTipoEntidad(Integer idTipoEntidad) {
         this.idTipoEntidad = idTipoEntidad;
     }
 

@@ -1,18 +1,18 @@
 package com.DTO;
 
 public class EstadosSistemaDTO {
-    private int idEstado;
+    private Integer idEstado;
     private String codigoEstado;
     private String nombreEstado;
 
     public EstadosSistemaDTO() {
     }
 
-    public int getIdEstado() {
+    public Integer getIdEstado() {
         return idEstado;
     }
 
-    public void setIdEstado(int idEstado) {
+    public void setIdEstado(Integer idEstado) {
         this.idEstado = idEstado;
     }
 

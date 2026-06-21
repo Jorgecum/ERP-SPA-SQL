@@ -1,27 +1,25 @@
 package com.DTO;
 
 public class UsuariosDTO {
-    private int idUsuario;
+    private Integer idUsuario;
     private String usuario;
     private String paswordHash;
-    private int idEntidad;
-    private int idRol;
-    private int idEstado;
+    private Integer idEntidad;
+    private Integer idRol;
+    private Integer idEstado;
     private String nombreEntidad;
     private String nombreRol;
     private String nombreEstado;
-
-
 
     public UsuariosDTO(){
 
     }
 
-    public int getIdUsuario(){
+    public Integer getIdUsuario(){
         return idUsuario;
     }
 
-    public void setIdUsuario(int idUsuario){
+    public void setIdUsuario(Integer idUsuario){
         this.idUsuario = idUsuario;
     }
 
@@ -41,27 +39,27 @@ public class UsuariosDTO {
         this.paswordHash = paswordHash;
     }
 
-    public int getIdEntidad(){
+    public Integer getIdEntidad(){
         return idEntidad;
     }
 
-    public void setIdEntidad(int idEntidad){
+    public void setIdEntidad(Integer idEntidad){
         this.idEntidad = idEntidad;
     }
 
-    public int getIdRol(){
+    public Integer getIdRol(){
         return idRol;
     }
 
-    public void setIdRol(int idRol){
+    public void setIdRol(Integer idRol){
         this.idRol = idRol;
     }
 
-    public int getIdEstado(){
+    public Integer getIdEstado(){
         return idEstado;
     }
 
-    public void setIdEstado(int idEstado){
+    public void setIdEstado(Integer idEstado){
         this.idEstado = idEstado;
     }
 

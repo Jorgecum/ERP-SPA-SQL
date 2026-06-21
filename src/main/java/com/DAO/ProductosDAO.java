@@ -1,21 +1,26 @@
 package com.DAO;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.DTO.ProductosDTO;
 import com.DTO.CategoriasDTO;
 import com.DTO.UnidadesDTO;
+import com.DTO.CertificadosDTO;
+import com.DTO.LotesDTO;
+import com.DTO.MovimientosDTO;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.Query;
 
 public class ProductosDAO {
     private static EntityManagerFactory emf = Persistence.createEntityManagerFactory("SDDGPU");
 
-    public int insertarProducto(ProductosDTO prod){
+    public boolean insertarProducto(ProductosDTO prod, LotesDTO lote){
         EntityManager em = emf.createEntityManager();
 
         String sql = """
@@ -38,10 +43,13 @@ public class ProductosDAO {
         try {
 
             em.getTransaction().begin();
+            
+            int idCate = obtenerCrearCategoria(em, prod.getCategoria());
+            int idUni = obtenerCrearMedida(em, prod.getUnidad());
 
             Number idGenerado = (Number) em.createNativeQuery(sql)
-                .setParameter(1, prod.getId_categoria())
-                .setParameter(2, prod.getId_unidad_medida())
+                .setParameter(1, idCate)
+                .setParameter(2, idUni)
                 .setParameter(3, 19)
                 .setParameter(4, prod.getCodigo_barras())
                 .setParameter(5, prod.getNombre_descripcion())
@@ -54,28 +62,64 @@ public class ProductosDAO {
                 .setParameter(12, prod.getImagen_url())
                 .getSingleResult();
             
-            int id = idGenerado.intValue();
+            int idProd =idGenerado.intValue();
+            Integer idLote = null;
 
-            String codigoFinal = (prod.getCodigo_unico() == null || prod.getCodigo_unico().trim().isEmpty()) 
-                             ? "P00" + id 
-                             : prod.getCodigo_unico();
-            
-            String sqlUpdate = "UPDATE productos SET codigo_unico = ?1 WHERE id_producto = ?2";
-            em.createNativeQuery(sqlUpdate)
-                    .setParameter(1, codigoFinal)
-                    .setParameter(2, id)
-                    .executeUpdate();
+            if(prod.isManeja_lote() && prod.getStock() > 0 && lote != null){
+                Integer idCertificado = null;
 
+                if(lote.getCerti() != null){
+                    CertificadosDTO certiOb = lote.getCerti();
+                    if(certiOb.getId_certifiado() > 0){
+                        idCertificado = certiOb.getId_certifiado();
+                    }else{
+                        idCertificado = crearCertificado(em, certiOb);
+                    }
+
+                    String sqlLote = """
+                            INSERT INTO lotes (
+                                    id_producto, 
+                                    id_certificado, 
+                                    numero_lote, 
+                                    fecha_entrada, 
+                                    stock_lote)
+                            OUTPUT INSERTED.id_lote
+                            VALUES (
+                                    ?1,?2,?3,GETDATE(),?4)
+                            """;
+
+                    Number id = (Number)em.createNativeQuery(sqlLote)
+                        .setParameter(1, idProd)
+                        .setParameter(2, idCertificado)
+                        .setParameter(3, lote.getNumero_lote())
+                        .setParameter(4, lote.getStock_lote())
+                        .getSingleResult();
+
+                    idLote = id.intValue();
+                }
+
+            }
+
+            if(prod.getStock() > 0){
+                MovimientosDTO mov = new MovimientosDTO();
+                mov.setIdProducto(idProd);
+                mov.setIdLote(idLote);
+                mov.setCantidad(prod.getStock());
+                mov.setIdTipoMovimiento(1);
+                mov.setReferencia("Saldo inicial");
+                movimientoInventario(em, mov);
+
+            }
 
             em.getTransaction().commit();
-            return idGenerado.intValue();
+            return true;
 
         } catch (Exception e) {
             e.printStackTrace();
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
-            return -1;
+            return false;
         }finally {
             em.close();
         }  
@@ -112,10 +156,19 @@ public class ProductosDAO {
                 prod.setCodigo_barras((String) fila[1]);
                 prod.setCodigo_unico((String) fila[2]);
                 prod.setNombre_descripcion((String) fila[3]);
-                prod.setCategoriaNombre((String) fila[4]);
+
+                CategoriasDTO cate = new CategoriasDTO();
+                cate.setNombreCategoria((String)fila[4]);
+                prod.setCategoria(cate);
+
                 prod.setPrecio_venta(((Number) fila[5]).doubleValue());
-                prod.setMedidaNombre((String) fila[6]);
-                prod.setManeja_lote((Boolean) fila[7]);
+                prod.setStock(((Number)fila[6]).intValue());
+
+                UnidadesDTO unidad = new UnidadesDTO();
+                unidad.setNombre((String)fila[7]);
+                prod.setUnidad(unidad);
+
+                prod.setManeja_lote((Boolean) fila[8]);
 
                 prodList.add(prod);
             }
@@ -128,64 +181,118 @@ public class ProductosDAO {
         return prodList;
     }
 
-    public boolean insertarCategoria(CategoriasDTO categoria){
-        EntityManager em = emf.createEntityManager();
-        String sql = """
+    public boolean movimientoInventario(EntityManager em, MovimientosDTO movimiento){
+        try {
+            
+            String sql = """
+                        INSERT INTO movimientos_inventario (
+                                                            id_producto,
+                                                            id_lote,
+                                                            id_tipo_movimiento,
+                                                            cantidad,
+                                                            fecha,
+                                                            referencia)
+                        VALUES (?1,?2,?3,?4, GETDATE(),?5)
+                    """;
+                    
+            em.createNativeQuery(sql)
+            .setParameter(1, movimiento.getIdProducto())
+            .setParameter(2, movimiento.getIdLote())
+            .setParameter(3, movimiento.getIdTipoMovimiento())
+            .setParameter(4, movimiento.getCantidad())
+            .setParameter(5, movimiento.getReferencia())
+            .executeUpdate();
+            
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public int crearCertificado(EntityManager em, CertificadosDTO certi){
+        try {
+            String sql = """
+                    INSERT INTO certificados (numero, fecha_emision, archivo_url)
+                    OUTPUT INSERTED.id_certificado
+                    VALUES (?1,?2,?3)
+                    """;
+
+            Date fechaEmision = new Date(certi.getFecha_emision().getTime());
+
+            Number id = (Number) em.createNativeQuery(sql)
+                        .setParameter(1, certi.getNumeroCertificado())
+                        .setParameter(2, fechaEmision)
+                        .setParameter(3, certi.getArchivo_url())
+                        .getSingleResult();
+            return id.intValue();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    public int obtenerCrearCategoria(EntityManager em ,CategoriasDTO categoria){
+        try {
+            String sqlSelect = """
+                        SELECT id_categoria FROM categorias
+                        WHERE nombre = ?1
+                
+            """;
+
+            Number id = (Number) em.createNativeQuery(sqlSelect)
+                        .setParameter(1, categoria.getNombreCategoria())
+                        .getSingleResult();
+            
+            return id.intValue();
+
+        } catch (NoResultException e) {
+            String sqlInsert = """
                 INSERT INTO categorias (nombre,
                                         descripcion,
                                         id_estado)
+                OUTPUT INSERTED.id_categoria
                 VALUES (?1,?2,?3)
                 """;
-    
-        try {
-            em.getTransaction().begin();
-            em.createNativeQuery(sql)
+            Number idAg = (Number) em.createNativeQuery(sqlInsert)
                 .setParameter(1, categoria.getNombreCategoria())
                 .setParameter(2, categoria.getDescripcion())
                 .setParameter(3, 1)
-                .executeUpdate();
-            
-            em.getTransaction().commit();
-            return true;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            return false;
-        }finally {
-            em.close();
-        }    
+                .getSingleResult();
+            return idAg.intValue();
+        } 
     }
 
-    public boolean insertarMedidad(UnidadesDTO medida){
-        EntityManager em = emf.createEntityManager();
-        String sql = """
+    public int obtenerCrearMedida(EntityManager em, UnidadesDTO medida){
+        try {
+            
+            String sqlSelect = """
+                        SELECT id_medida FROM medidas
+                        WHERE nombre = ?1
+                    """;
+            Number id  = (Number) em.createNativeQuery(sqlSelect)
+                .setParameter(1, medida.getNombre())
+                .getSingleResult();
+            
+            return id.intValue();
+
+        } catch (NoResultException e) {
+            String sql = """
                 INSERT INTO medidas (nombre,
                                     id_estado)
+                OUTPUT INSERTED.id_medida
                 VALUES(?1,?2)
                 """;
-        try {
 
-            em.getTransaction().begin();
-            em.createNativeQuery(sql)
+            Number idAg = (Number) em.createNativeQuery(sql)
                 .setParameter(1, medida.getNombre())
                 .setParameter(2, 1)
-                .executeUpdate();
+                .getSingleResult();
 
-            em.getTransaction().commit();
-            return true;
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            return false;
-        }finally {
-            em.close();
-        }    
+            return idAg.intValue();
+        }
+        
     
     }
 
@@ -237,7 +344,7 @@ public class ProductosDAO {
 
         try {
             
-            Query query = em.createNamedQuery(sql);
+            Query query = em.createNativeQuery(sql);
             List<Object[]> resultado = query.getResultList();
             for(Object[]fila : resultado){
                 CategoriasDTO cat = new CategoriasDTO();
@@ -255,6 +362,45 @@ public class ProductosDAO {
         return listaCategorias;
     }
 
+    public boolean procesarMovimiento(EntityManager em, MovimientosDTO movimiento){
+        try {
 
+            int factor = 0;
+
+            if(movimiento.getIdMovimiento() == 1 || movimiento.getIdMovimiento() == 3){
+                factor = 1;
+            }else{
+                factor = -1;
+            }
+
+            int cantidadModificar = movimiento.getCantidad() * factor;
+
+            String sql1 = """
+                    UPDATE productos SET stock = stock + ?1 
+                    WHERE id_producto = ?2
+                    """;
+            em.createNativeQuery(sql1)
+                .setParameter(1, cantidadModificar)
+                .setParameter(2, movimiento.getIdProducto())
+                .executeUpdate();
+
+            if(movimiento.getIdLote() != null && movimiento.getIdLote()>0){
+                String sql2 = """
+                        UPDATE lotes SET stock_lote = stock_lote + ?1
+                        WHERE id_lote = ?2 
+                        """;
+                em.createNativeQuery(sql2)
+                    .setParameter(1, cantidadModificar)
+                    .setParameter(2, movimiento.getIdLote())
+                    .executeUpdate();
+            }
+            
+            return true;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
 }

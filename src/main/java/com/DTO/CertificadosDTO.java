@@ -2,7 +2,7 @@ package com.DTO;
 import java.util.Date;
 
 public class CertificadosDTO {
-    private int id_certificado;
+    private Integer id_certificado;
     private String numeroCertificado;
     private Date fecha_emision;
     private String archivo_url;
@@ -11,11 +11,11 @@ public class CertificadosDTO {
 
     }
 
-    public int getId_certifiado(){
+    public Integer getId_certifiado(){
         return id_certificado;
     }
 
-    public void setId_certificado(int id_certificado){
+    public void setId_certificado(Integer id_certificado){
         this.id_certificado = id_certificado;
     }
 

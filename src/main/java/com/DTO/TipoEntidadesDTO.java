@@ -1,17 +1,17 @@
 package com.DTO;
 
 public class TipoEntidadesDTO {
-    private int idTipoEntidad;
+    private Integer idTipoEntidad;
     private String nombreTipoEntidad;
 
     public TipoEntidadesDTO() {
     }
 
-    public int getIdTipoEntidad() {
+    public Integer getIdTipoEntidad() {
         return idTipoEntidad;
     }
 
-    public void setIdTipoEntidad(int idTipoEntidad) {
+    public void setIdTipoEntidad(Integer idTipoEntidad) {
         this.idTipoEntidad = idTipoEntidad;
     }
 

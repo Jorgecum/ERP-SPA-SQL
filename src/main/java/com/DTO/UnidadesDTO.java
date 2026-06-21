@@ -1,18 +1,18 @@
 package com.DTO;
 
 public class UnidadesDTO {
-    private int id_medida;
+    private Integer id_medida;
     private String nombre;
-    private int id_estado;
+    private Integer id_estado;
     
     public UnidadesDTO() {
     }
 
-    public int getId_medida() {
+    public Integer getId_medida() {
         return id_medida;
     }
 
-    public void setId_medida(int id_medida) {
+    public void setId_medida(Integer id_medida) {
         this.id_medida = id_medida;
     }
 
@@ -24,11 +24,11 @@ public class UnidadesDTO {
         this.nombre = nombre;
     }
 
-    public int getId_estado() {
+    public Integer getId_estado() {
         return id_estado;
     }
 
-    public void setId_estado(int id_estado) {
+    public void setId_estado(Integer id_estado) {
         this.id_estado = id_estado;
     }
 

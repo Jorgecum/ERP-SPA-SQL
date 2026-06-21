@@ -13,7 +13,10 @@ import java.io.PrintWriter;
 import com.DAO.CertificadosDAO;
 import com.DAO.LotesDAO;
 import com.DAO.ProductosDAO;
+import com.DTO.CategoriasDTO;
 import com.DTO.CertificadosDTO;
+import com.DTO.ProductosDTO;
+import com.DTO.UnidadesDTO;
 import com.google.gson.Gson;;
 
 @WebServlet("/InventarioController")
@@ -29,7 +32,7 @@ public class InventarioController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
        
     }
-
+/* 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
@@ -40,19 +43,24 @@ public class InventarioController extends HttpServlet {
             action = "insertar";
         }
 
-
-
         try (PrintWriter out = response.getWriter()) {
 
             BufferedReader reader = request.getReader();
 
-            CertificadosDTO certi = gson.fromJson(reader, CertificadosDTO.class);
-
             switch (action) {
-                case "insertar":
+                case "insertarProd":
+                    ProductosDTO prodT = gson.fromJson(reader, ProductosDTO.class);
 
+                    boolean insertadoP = prodDAO.insertarProducto(prodT);
+                    if(insertadoP){
+                        response.setStatus(HttpServletResponse.SC_OK); // Estado 200
+                        out.print("{\"success\": true, \"message\": \"Producto registrado con éxito en SQL Server\"}");
+                    }else{
+                        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR); // Estado 500
+                        out.print("{\"success\": false, \"error\": \"Error interno en la base de datos al insertar categoria\"}");
+                    }
                     break;
-            
+                
                 default:
                     break;
             }
@@ -69,6 +77,6 @@ public class InventarioController extends HttpServlet {
 
     }
 
-
+*/
 }
 

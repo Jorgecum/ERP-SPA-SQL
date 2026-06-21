@@ -2,9 +2,6 @@ package com.DTO;
 
 public class ProductosDTO {
     private int id_producto;
-    private int id_categoria;
-    private int id_unidad_medida;
-    private int id_estado;
     private String codigo_barras;
     private String nombre_descripcion;
     private Double precio_venta;
@@ -15,9 +12,9 @@ public class ProductosDTO {
     private boolean maneja_lote;
     private String  imagen_url;
     private String codigo_unico;
-    private String categoriaNombre;
-    private String medidaNombre;
-    
+    private EstadosSistemaDTO estado;
+    private UnidadesDTO unidad;
+    private CategoriasDTO categoria;
 
     public ProductosDTO() {
     }
@@ -28,30 +25,6 @@ public class ProductosDTO {
 
     public void setId_producto(int id_producto) {
         this.id_producto = id_producto;
-    }
-
-    public int getId_categoria() {
-        return id_categoria;
-    }
-
-    public void setId_categoria(int id_categoria) {
-        this.id_categoria = id_categoria;
-    }
-
-    public int getId_unidad_medida() {
-        return id_unidad_medida;
-    }
-
-    public void setId_unidad_medida(int id_unidad_medida) {
-        this.id_unidad_medida = id_unidad_medida;
-    }
-
-    public int getId_estado() {
-        return id_estado;
-    }
-
-    public void setId_estado(int id_estado) {
-        this.id_estado = id_estado;
     }
 
     public String getCodigo_barras() {
@@ -121,7 +94,7 @@ public class ProductosDTO {
     public String getImagen_url() {
         return imagen_url;
     }
-    
+
     public void setImagen_url(String imagen_url) {
         this.imagen_url = imagen_url;
     }
@@ -134,22 +107,30 @@ public class ProductosDTO {
         this.codigo_unico = codigo_unico;
     }
 
-    public String getCategoriaNombre() {
-        return categoriaNombre;
+    public EstadosSistemaDTO getEstado() {
+        return estado;
     }
 
-    public void setCategoriaNombre(String categoriaNombre) {
-        this.categoriaNombre = categoriaNombre;
+    public void setEstado(EstadosSistemaDTO estado) {
+        this.estado = estado;
     }
 
-    public String getMedidaNombre() {
-        return medidaNombre;
+    public UnidadesDTO getUnidad() {
+        return unidad;
     }
 
-    public void setMedidaNombre(String medidaNombre) {
-        this.medidaNombre = medidaNombre;
+    public void setUnidad(UnidadesDTO unidad) {
+        this.unidad = unidad;
     }
 
-    
+    public CategoriasDTO getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(CategoriasDTO categoria) {
+        this.categoria = categoria;
+    }
+
+
     
 }

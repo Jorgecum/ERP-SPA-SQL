@@ -1,19 +1,19 @@
 package com.DTO;
 
 public class CategoriasDTO {
-    private int id_categoria;
+    private Integer id_categoria;
     private String nombreCategoria;
     private String descripcion;
-    private int id_estado;
+    private Integer id_estado;
     
     public CategoriasDTO() {
     }
 
-    public int getId_categoria() {
+    public Integer getId_categoria() {
         return id_categoria;
     }
 
-    public void setId_categoria(int id_categoria) {
+    public void setId_categoria(Integer id_categoria) {
         this.id_categoria = id_categoria;
     }
 
@@ -33,11 +33,11 @@ public class CategoriasDTO {
         this.descripcion = descripcion;
     }
 
-    public int getId_estado() {
+    public Integer getId_estado() {
         return id_estado;
     }
 
-    public void setId_estado(int id_estado) {
+    public void setId_estado(Integer id_estado) {
         this.id_estado = id_estado;
     }
 

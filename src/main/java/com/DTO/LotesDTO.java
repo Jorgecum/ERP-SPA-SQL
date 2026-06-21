@@ -2,38 +2,22 @@ package com.DTO;
 import java.util.Date;
 
 public class LotesDTO {
-    private int id_lote;
-    private int id_productos;
-    private int id_certificado;
+    private Integer id_lote;
     private String numero_lote;
     private Date fecha_entrada;
-    private int stock_lote;
-    
+    private Integer stock_lote;
+    private ProductosDTO producto;
+    private CertificadosDTO certi;
+
     public LotesDTO() {
     }
 
-    public int getId_lote() {
+    public Integer getId_lote() {
         return id_lote;
     }
 
-    public void setId_lote(int id_lote) {
+    public void setId_lote(Integer id_lote) {
         this.id_lote = id_lote;
-    }
-
-    public int getId_productos() {
-        return id_productos;
-    }
-
-    public void setId_productos(int id_productos) {
-        this.id_productos = id_productos;
-    }
-
-    public int getId_certificado() {
-        return id_certificado;
-    }
-
-    public void setId_certificado(int id_certificado) {
-        this.id_certificado = id_certificado;
     }
 
     public String getNumero_lote() {
@@ -52,14 +36,32 @@ public class LotesDTO {
         this.fecha_entrada = fecha_entrada;
     }
 
-    public int getStock_lote() {
+    public Integer getStock_lote() {
         return stock_lote;
     }
 
-    public void setStock_lote(int stock_lote) {
+    public void setStock_lote(Integer stock_lote) {
         this.stock_lote = stock_lote;
     }
 
+    public ProductosDTO getProducto() {
+        return producto;
+    }
+
+    public void setProducto(ProductosDTO producto) {
+        this.producto = producto;
+    }
+
+    public CertificadosDTO getCerti() {
+        return certi;
+    }
+
+    public void setCerti(CertificadosDTO certi) {
+        this.certi = certi;
+    }
+
+    
+    
     
     
 }

@@ -2,7 +2,9 @@ package com.DAO;
 
 import java.util.*;
 
+import com.DTO.CertificadosDTO;
 import com.DTO.LotesDTO;
+import com.DTO.ProductosDTO;
 
 import jakarta.persistence.*;
 
@@ -23,9 +25,14 @@ public class LotesDAO {
         try {
 
             em.getTransaction().begin();
+            Integer idCertificado = null;
+            if(lote.getCerti() != null){
+                idCertificado = lote.getCerti().getId_certifiado();
+            }
+
             em.createNativeQuery(sql)
-                .setParameter(1, lote.getId_productos())
-                .setParameter(2, lote.getId_certificado())
+                .setParameter(1, lote.getProducto().getId_producto())
+                .setParameter(2, idCertificado)
                 .setParameter(3, lote.getNumero_lote())
                 .setParameter(4, lote.getStock_lote())
                 .executeUpdate();
@@ -68,8 +75,15 @@ public class LotesDAO {
             for(Object[] fila : resultado){
                 LotesDTO lote = new LotesDTO();
                 lote.setId_lote(((Number)fila[0]).intValue());
-                lote.setId_certificado(((Number)fila[1]).intValue());
-                lote.setId_productos(((Number)fila[2]).intValue());
+
+                CertificadosDTO certi = new CertificadosDTO();
+                certi.setId_certificado(((Number)fila[1]).intValue());
+                lote.setCerti(certi);
+
+                ProductosDTO prod = new ProductosDTO();
+                prod.setId_producto(((Number)fila[2]).intValue());
+                lote.setProducto(prod);
+
                 lote.setNumero_lote((String)fila[3]);
                 lote.setFecha_entrada((Date)fila[4]);
                 lote.setStock_lote(((Number)fila[5]).intValue());

@@ -1,18 +1,18 @@
 package com.DTO;
 
 public class RolesDTO {
-    private int idRol;
+    private Integer idRol;
     private String nombreRol;
 
     public RolesDTO(){
 
     }
 
-    public int getIdRol(){
+    public Integer getIdRol(){
         return idRol;
     }
 
-    public void setIdRol(int idRol){
+    public void setIdRol(Integer idRol){
         this.idRol = idRol;
     }
 
