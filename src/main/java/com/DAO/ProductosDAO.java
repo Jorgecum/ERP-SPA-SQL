@@ -1,6 +1,5 @@
 package com.DAO;
 
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +55,7 @@ public class ProductosDAO {
                 .setParameter(6, prod.getPrecio_venta())
                 .setParameter(7, prod.getPrecio_mayorista())
                 .setParameter(8, prod.getPrecio_distribuidor())
-                .setParameter(9, prod.getStock())
+                .setParameter(9, 0)
                 .setParameter(10, prod.getStock_minimo())
                 .setParameter(11, prod.isManeja_lote() )
                 .setParameter(12, prod.getImagen_url())
@@ -64,39 +63,39 @@ public class ProductosDAO {
             
             int idProd =idGenerado.intValue();
             Integer idLote = null;
+            Integer idCertificado = null;
 
             if(prod.isManeja_lote() && prod.getStock() > 0 && lote != null){
-                Integer idCertificado = null;
+                
+                int stockLote = lote.getStock_lote();
+                prod.setStock(stockLote);
 
                 if(lote.getCerti() != null){
-                    CertificadosDTO certiOb = lote.getCerti();
-                    if(certiOb.getId_certifiado() > 0){
-                        idCertificado = certiOb.getId_certifiado();
-                    }else{
-                        idCertificado = crearCertificado(em, certiOb);
+                    int idResultado = obtenerOCrearCertificado(em, lote.getCerti());
+                    if (idResultado > 0) {
+                        idCertificado = idResultado;
                     }
+                }
 
-                    String sqlLote = """
-                            INSERT INTO lotes (
+                String sqlLote = """
+                        INSERT INTO lotes (
                                     id_producto, 
                                     id_certificado, 
                                     numero_lote, 
                                     fecha_entrada, 
                                     stock_lote)
-                            OUTPUT INSERTED.id_lote
-                            VALUES (
-                                    ?1,?2,?3,GETDATE(),?4)
-                            """;
+                        OUTPUT INSERTED.id_lote
+                        VALUES (?1,?2,?3,GETDATE(),?4)
+                        """;
 
-                    Number id = (Number)em.createNativeQuery(sqlLote)
+                Number id = (Number)em.createNativeQuery(sqlLote)
                         .setParameter(1, idProd)
                         .setParameter(2, idCertificado)
                         .setParameter(3, lote.getNumero_lote())
-                        .setParameter(4, lote.getStock_lote())
+                        .setParameter(4, 0)
                         .getSingleResult();
 
-                    idLote = id.intValue();
-                }
+                idLote = id.intValue();
 
             }
 
@@ -107,6 +106,7 @@ public class ProductosDAO {
                 mov.setCantidad(prod.getStock());
                 mov.setIdTipoMovimiento(1);
                 mov.setReferencia("Saldo inicial");
+                procesarMovimiento(em, mov);
                 movimientoInventario(em, mov);
 
             }
@@ -211,27 +211,52 @@ public class ProductosDAO {
         }
     }
 
-    public int crearCertificado(EntityManager em, CertificadosDTO certi){
+public int obtenerOCrearCertificado(EntityManager em, CertificadosDTO certi) {
+    
+    if (certi == null || certi.getNumeroCertificado() == null || certi.getNumeroCertificado().trim().isEmpty()) {
+        return -1; 
+    }
+
+    try {
+        
+        String sqlSelect = """
+                SELECT id_certificado FROM certificados
+                WHERE numero = ?1 AND fecha_emision = ?2
+                """;
+        
+        java.sql.Date fechaEmision = new java.sql.Date(certi.getFecha_emision().getTime());
+
         try {
-            String sql = """
+            Number idEncontrado = (Number) em.createNativeQuery(sqlSelect)
+                    .setParameter(1, certi.getNumeroCertificado().trim())
+                    .setParameter(2, fechaEmision)
+                    .getSingleResult();
+            
+           
+            return idEncontrado.intValue();
+            
+        } catch (NoResultException e) {
+            
+            String sqlInsert = """
                     INSERT INTO certificados (numero, fecha_emision, archivo_url)
                     OUTPUT INSERTED.id_certificado
-                    VALUES (?1,?2,?3)
+                    VALUES (?1, ?2, ?3)
                     """;
 
-            Date fechaEmision = new Date(certi.getFecha_emision().getTime());
-
-            Number id = (Number) em.createNativeQuery(sql)
-                        .setParameter(1, certi.getNumeroCertificado())
-                        .setParameter(2, fechaEmision)
-                        .setParameter(3, certi.getArchivo_url())
-                        .getSingleResult();
-            return id.intValue();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
+            Number idGenerado = (Number) em.createNativeQuery(sqlInsert)
+                    .setParameter(1, certi.getNumeroCertificado().trim())
+                    .setParameter(2, fechaEmision)
+                    .setParameter(3, certi.getArchivo_url())
+                    .getSingleResult();
+            
+            return idGenerado.intValue();
         }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return -1;
     }
+}
 
     public int obtenerCrearCategoria(EntityManager em ,CategoriasDTO categoria){
         try {
@@ -367,7 +392,7 @@ public class ProductosDAO {
 
             int factor = 0;
 
-            if(movimiento.getIdMovimiento() == 1 || movimiento.getIdMovimiento() == 3){
+            if(movimiento.getIdTipoMovimiento() == 1 || movimiento.getIdTipoMovimiento() == 3){
                 factor = 1;
             }else{
                 factor = -1;

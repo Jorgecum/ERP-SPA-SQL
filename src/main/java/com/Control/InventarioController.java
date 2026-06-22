@@ -9,30 +9,70 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.*;
 
-import com.DAO.CertificadosDAO;
-import com.DAO.LotesDAO;
-import com.DAO.ProductosDAO;
-import com.DTO.CategoriasDTO;
-import com.DTO.CertificadosDTO;
-import com.DTO.ProductosDTO;
-import com.DTO.UnidadesDTO;
-import com.google.gson.Gson;;
+import com.DAO.*;
+import com.DTO.*;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 @WebServlet("/InventarioController")
 public class InventarioController extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private ProductosDAO prodDAO = new ProductosDAO();
-    private LotesDAO loteDAO = new LotesDAO();
-    private CertificadosDAO certiDAO = new CertificadosDAO();
     private Gson gson = new Gson();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-       
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        String accion = request.getParameter("action");
+
+        if(accion == null || accion.trim().isEmpty()){
+            accion = "listarProductos";
+        }
+
+        PrintWriter out = null;
+        try {
+            out = response.getWriter();
+            switch (accion) {
+                case "listarProductos":
+                    List<ProductosDTO> listaPrd = prodDAO.mostrarProductos(); 
+                    out.print(gson.toJson(listaPrd));
+                    break;
+                
+                case "listarCategorias":
+                    List<CategoriasDTO> listaCat = prodDAO.mostrarCategorias();
+                    out.print(gson.toJson(listaCat));
+                    break;
+
+                case "listarMedidas":
+                    List<UnidadesDTO> listaMedidas = prodDAO.mostrarMedidas();
+                    out.print(gson.toJson(listaMedidas));
+                    break;
+                default:
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    out.print("{\"error\":\"Acción GET no válida\"}");
+                    break;
+            }
+        } catch (Exception e) {
+            response.setStatus(
+                HttpServletResponse.SC_INTERNAL_SERVER_ERROR
+            );
+
+            if(out == null){
+                out = response.getWriter();
+            }
+
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage() != null ? e.getMessage() : "Error interno en doGet");
+            out.print(gson.toJson(errorResponse));
+        }
     }
-/* 
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
@@ -42,41 +82,55 @@ public class InventarioController extends HttpServlet {
         if(action == null){
             action = "insertar";
         }
+        PrintWriter out = null;
+        try {
+            out = response.getWriter();
 
-        try (PrintWriter out = response.getWriter()) {
+            if(action.equals("insertar")){
+                BufferedReader reader = request.getReader();
 
-            BufferedReader reader = request.getReader();
+                JsonObject jsonObject = gson.fromJson(reader, JsonObject.class);
 
-            switch (action) {
-                case "insertarProd":
-                    ProductosDTO prodT = gson.fromJson(reader, ProductosDTO.class);
+                ProductosDTO producto = gson.fromJson(jsonObject.get("producto"), ProductosDTO.class);
+                LotesDTO lote = null;
 
-                    boolean insertadoP = prodDAO.insertarProducto(prodT);
-                    if(insertadoP){
-                        response.setStatus(HttpServletResponse.SC_OK); // Estado 200
-                        out.print("{\"success\": true, \"message\": \"Producto registrado con éxito en SQL Server\"}");
-                    }else{
-                        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR); // Estado 500
-                        out.print("{\"success\": false, \"error\": \"Error interno en la base de datos al insertar categoria\"}");
-                    }
-                    break;
-                
-                default:
-                    break;
+                if(jsonObject.has("lote") && !jsonObject.get("lote").isJsonNull()){
+                    lote = gson.fromJson(jsonObject.get("lote"),LotesDTO.class);
+                }
+
+                boolean insertado = prodDAO.insertarProducto(producto, lote)    ;
+
+                if(insertado){
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    out.print("{\"success\": true, \"message\": \"Producto e inventario registrados con éxito en Solda-Master\"}");
+                }else{
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    out.print("{\"success\": false, \"error\": \"Error interno al insertar el producto en SQL Server\"}");
+                }
+            }else{
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"success\": false, \"error\": \"Acción POST no válida\"}");
             }
             
         } catch (Exception e) {
-             e.printStackTrace();
+            e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR); // Estado 500
             try {
-                response.getWriter().print("{\"success\": false, \"error\": \"" + e.getMessage() + "\"}");
+                if (out == null) { 
+                    out = response.getWriter(); 
+                }
+                
+                Map<String, Object> err = new HashMap<>();
+                err.put("success", false);
+                err.put("error", e.getMessage() != null ? e.getMessage() : "Error en doPost de Productos");
+                out.print(gson.toJson(err));
+                
             } catch (IOException ioEx) {
                 ioEx.printStackTrace();
             }
         }
 
     }
-
-*/
 }
+
 

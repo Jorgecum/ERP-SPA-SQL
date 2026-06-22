@@ -138,7 +138,8 @@ public class OrdenDAO {
 
         return lista;
     }
-
+    
+    @SuppressWarnings("unchecked")
     public OrdenCompraDTO listarOrden(OrdenCompraDTO orden){
        EntityManager em = emf.createEntityManager();
 

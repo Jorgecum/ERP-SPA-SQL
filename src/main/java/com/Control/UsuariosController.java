@@ -11,7 +11,10 @@ import com.DAO.UsuariosDAO;
 import com.DTO.RolesDTO;
 import com.DTO.UsuariosDTO;
 import com.google.gson.Gson;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.io.*;
 
 
@@ -36,7 +39,9 @@ public class UsuariosController extends HttpServlet {
             accion = "listarUsu";
         }
 
-        try(PrintWriter out = response.getWriter()){
+        PrintWriter out = null;
+        try{
+            out = response.getWriter();
             switch (accion) {
                 case "listarRoles":
                     List<RolesDTO> roles = rolesDAO.listarRoles();
@@ -53,9 +58,13 @@ public class UsuariosController extends HttpServlet {
             response.setStatus(
                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
-            response.getWriter().print(
-                "{\"error\":\"" + e.getMessage() + "\"}"
-            );
+            if(out == null){
+                out = response.getWriter();
+            }
+
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage() != null ? e.getMessage() : "Error interno en doGet");
+            out.print(gson.toJson(errorResponse));
         }
     }
 
