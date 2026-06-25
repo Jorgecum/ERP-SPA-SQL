@@ -51,7 +51,7 @@ public class VentaDAO {
 
             Number idGenerado = (Number) em.createNativeQuery(sql)
                 .setParameter(1, venta.getCliente().getIdEntidad())
-                .setParameter(2, venta.getUsuario().getIdEntidad())
+                .setParameter(2, venta.getUsuario().getIdUsuario())
                 .setParameter(3, idVentaReferencia)
                 .setParameter(4, venta.getSerie_correlativa())
                 .setParameter(5, venta.getTipo_comprobante())
@@ -79,7 +79,10 @@ public class VentaDAO {
 
                     MovimientosDTO movimiento = new MovimientosDTO();
                     movimiento.setIdProducto(detalle.getProducto().getId_producto());
-                    movimiento.setIdLote(detalle.getLote().getId_lote());
+
+                    if (detalle.getLote() != null) {
+                        movimiento.setIdLote(detalle.getLote().getId_lote());
+                    }
                     movimiento.setCantidad(detalle.getCantidad());
                     movimiento.setIdTipoMovimiento(2);
                     movimiento.setReferencia(" Venta " + venta.getTipo_comprobante() + " " + venta.getSerie_correlativa());
@@ -185,10 +188,11 @@ public class VentaDAO {
                                                      sub_total)
                             VALUES (?1,?2,?3,?4,?5,?6,?7)
                      """;
+            Integer idLote = (detalle.getLote() != null) ? detalle.getLote().getId_lote() : null;
              em.createNativeQuery(sql)
                  .setParameter(1, detalle.getVenta().getIdVenta())
                  .setParameter(2, detalle.getProducto().getId_producto())
-                 .setParameter(3, detalle.getLote().getId_lote())
+                 .setParameter(3, idLote)
                  .setParameter(4, detalle.getCantidad())
                  .setParameter(5, detalle.getPrecio_unitario())
                  .setParameter(6, detalle.getDescuento_prod())

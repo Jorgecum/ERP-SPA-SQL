@@ -4,7 +4,7 @@ import java.util.List;
 public class VentaDTO {
     private Integer idVenta;
     private EntidadesDTO cliente;
-    private EntidadesDTO usuario;
+    private UsuariosDTO usuario;
     private Integer id_venta_referencia;
     private String serie_correlativa;
     private String tipo_comprobante;
@@ -34,14 +34,6 @@ public class VentaDTO {
 
     public void setCliente(EntidadesDTO cliente) {
         this.cliente = cliente;
-    }
-
-    public EntidadesDTO getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(EntidadesDTO usuario) {
-        this.usuario = usuario;
     }
 
     public Integer getId_venta_referencia() {
@@ -133,6 +125,13 @@ public class VentaDTO {
         this.pagos = pagos;
     }
 
-    
+    public UsuariosDTO getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(UsuariosDTO usuario) {
+        this.usuario = usuario;
+    }
+
     
 }

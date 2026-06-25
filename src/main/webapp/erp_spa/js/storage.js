@@ -1,34 +1,6 @@
-﻿    // ==========================================
-    // STORAGE & PERSISTENCE ENGINE (ES6 MODULE)
-    // ==========================================
-
+﻿
     const STORAGE_KEY = 'DELGADO_ERP_MOCK_DB';
 
-    // 1. Initial Seed Data
-    const SEED_DB = {
-        exchangeRates: [
-            { id: 1, from: 'USD', to: 'PEN', rate: 3.75, date: '2026-05-18', status: 'Activo' }
-        ],
-        categories: ['Tuberías', 'Válvulas', 'Conexiones', 'Herramientas', 'Insumos'],
-        units: ['Unidad', 'Metro', 'Kg', 'Galón', 'Caja'],
-        products: [
-            { id: 1, code: 'P001', barcode: '775000100011', name: 'Tubo de Acero 2"', category: 'Tuberías', unit: 'Unidad', price: 150.00, priceMayorista: 140.00, priceDistribuidor: 130.00, stock: 45, minStock: 20, manejaLote: true, procesoSoldadura: 'SMAW', amperaje: '100-130A', materialBase: 'Acero al Carbono', image: '' },
-            { id: 2, code: 'P002', barcode: '775000100022', name: 'Válvula Esférica', category: 'Válvulas', unit: 'Unidad', price: 85.50, priceMayorista: 80.00, priceDistribuidor: 75.00, stock: 12, minStock: 15, manejaLote: false, procesoSoldadura: 'N/A', amperaje: 'N/A', materialBase: 'Bronce', image: '' }
-        ],
-        lotes: [
-            { id: 1, productId: 1, loteNumber: 'L-2026-001', dateIn: '2026-05-01', stock: 45, hasCert: true, certificateName: 'Certificado_Calidad_P001.pdf' }
-        ],
-        sales: [],
-        proformas: [],
-        installments: [],
-        inventoryMovements: [],
-        purchases: [],
-        guias: [], // OBSOLETO
-        notasCredito: [],
-        purchaseOrders: []
-    };
-
-    // 2. Load DB from LocalStorage or Load Seed
     let MOCK_DB = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (!MOCK_DB) {
         MOCK_DB = JSON.parse(JSON.stringify(SEED_DB));
@@ -39,7 +11,7 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_DB));
     }
 
-    // 3. Counters for Correlatives
+
     let boletaCounter = parseInt(localStorage.getItem('boletaCounter')) || 1;
     let facturaCounter = parseInt(localStorage.getItem('facturaCounter')) || 1;
     let proformaCounter = parseInt(localStorage.getItem('proformaCounter')) || 1;
@@ -57,37 +29,37 @@
     // 4. API Service Layer
     const api = {
         async login(username, password) {
-        try {
-            const response = await fetch('UsuariosController?action=login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        usuario: username,
-                        paswordHash: password 
-                    })
-                });
+            try {
+                const response = await fetch('UsuariosController?action=login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            usuario: username,
+                            paswordHash: password 
+                        })
+                    });
 
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        throw new Error('Credenciales incorrectas o usuario inactivo.');
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            throw new Error('Credenciales incorrectas o usuario inactivo.');
+                        }
+                        throw new Error('Error en el servidor al intentar iniciar sesión.');
                     }
-                    throw new Error('Error en el servidor al intentar iniciar sesión.');
-                }
 
+                    
+                    const user = await response.json();
+                    
+                    
+                    localStorage.setItem('usuario_sesion', JSON.stringify(user));
+                    
+                    return user;
                 
-                const user = await response.json();
-                
-                
-                localStorage.setItem('usuario_sesion', JSON.stringify(user));
-                
-                return user;
-            
-        } catch (error) {
-                console.error('Error en login', error);
-                throw error;
-        }
+            } catch (error) {
+                    console.error('Error en login', error);
+                    throw error;
+            }
         },
         
         async getProducts() {
@@ -168,10 +140,25 @@
 
 
             } catch (e) {
-                console.error('Error fetching entities:', e);
+                console.error('Error fetching users:', e);
                 return[];
             }
             
+        },
+
+        async getPaymentMethods(){
+            try {
+                const response = await fetch('VentaController?action=listarMetodos');
+
+                if(!response.ok){
+                    throw new Error(`Error en el servidor: ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (e) {
+                console.error('Error fetching method:', e);
+                return[];
+            }
         },
 
         async getEntities() {
@@ -279,19 +266,17 @@
             saveDB();
         },
         
-        async saveSale(venta, pagoInicial) {
+        async saveSale(venta) {
             try {
                 const response = await fetch('VentaController?action=insertar', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ venta: venta, pagoInicial: pagoInicial })
+                    body: JSON.stringify({ venta: venta })
                 });
-
                 if (!response.ok) {
                     const err = await response.json();
                     throw new Error(err.error || 'Error al procesar la venta');
                 }
-                
                 return await response.json();
             } catch (e) {
                 console.error('Error saving sale:', e);

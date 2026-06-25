@@ -57,7 +57,19 @@ function renderLogin() {
         btn.disabled = true;
         
         try {
-            state.user = await api.login(document.getElementById('l-user').value, document.getElementById('l-pass').value);
+            const userData = await api.login(
+                document.getElementById('l-user').value,
+                document.getElementById('l-pass').value
+            );
+
+            state.user = userData;
+
+            // Guardamos la sesión en localStorage
+            localStorage.setItem(
+                'usuario_sesion',
+                JSON.stringify(state.user)
+            );
+
             state.currentView = 'dashboard';
             initApp();
         } catch(err) { 
@@ -74,23 +86,21 @@ function renderLogin() {
         }
     });
 }
+
 function renderLayout() {
     const sidebarHTML = renderSidebar();
     const headerHTML = renderHeader();
     
     document.getElementById('app').innerHTML = `
-        <!-- Overlay for mobile -->
         ${!state.sidebarCollapsed ? `
         <div class="fixed inset-0 bg-[#0F172A]/50 z-30 md:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
         ` : ''}
         
         ${sidebarHTML}
 
-        <!-- Main Content -->
         <main class="flex-1 flex flex-col min-w-0 bg-[#0F172A] relative h-screen">
             ${headerHTML}
 
-            <!-- Page Content -->
             <div id="main-area" class="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar scroll-smooth">
                 <div class="flex justify-center items-center h-full">
                     <div class="animate-spin rounded-full h-12 w-12 border-4 border-[#334155] border-t-blue-500"></div>
@@ -99,7 +109,6 @@ function renderLayout() {
         </main>
     `;
     
-    // Add custom scrollbar styles dynamically if not present
     if (!document.getElementById('custom-scrollbar-styles')) {
         const style = document.createElement('style');
         style.id = 'custom-scrollbar-styles';
@@ -115,14 +124,12 @@ function renderLayout() {
         document.head.appendChild(style);
     }
 
-    // Execute active page renderer
     const pageRenderFunctionName = ROUTES[state.currentView]?.render;
     if (typeof window[pageRenderFunctionName] === 'function') {
         window[pageRenderFunctionName](document.getElementById('main-area'));
     }
 }
 
-// Layout helper bindings
 window.toggleSidebar = () => {
     state.sidebarCollapsed = !state.sidebarCollapsed;
     renderLayout();
@@ -131,9 +138,7 @@ window.toggleSidebar = () => {
 window.logout = () => { 
     state.user = null; 
     state.cart = []; 
-
     localStorage.removeItem('usuario_sesion');
-
     initApp(); 
 };
 
@@ -152,7 +157,6 @@ window.toggleThemeMode = () => {
 async function initApp() { 
     if (window.innerWidth < 768) state.sidebarCollapsed = true;
     
-    // Theme restore
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'light') {
         document.body.classList.add('light-theme');
@@ -160,18 +164,22 @@ async function initApp() {
         document.body.classList.remove('light-theme');
     }
     
+    // Recuperar la sesión guardada en localStorage si el estado volátil se reinicia
+    if (!state.user) {
+        const savedSession = localStorage.getItem('usuario_sesion');
+        if (savedSession) {
+            state.user = JSON.parse(savedSession);
+        }
+    }
+    
     if (state.user) {
         try {
-
             await cargarDatosMaestro();
             renderLayout();
-
        } catch (error) {
-
             console.error("Error al cargar datos: ", error);
             renderLayout();
        }
-
     } else {
         renderLogin();
     }
@@ -189,13 +197,10 @@ async function cargarDatosMaestro() {
     state.caches.products = data.listarProd;
     state.caches.lotes = data.listarLotes;
     state.caches.certificados = data.listarCerti;
-
 }
 
 window.initApp = initApp;
 window.renderLogin = renderLogin;
 window.renderLayout = renderLayout;
 
-// Boot application
-//startClock();
 initApp();
