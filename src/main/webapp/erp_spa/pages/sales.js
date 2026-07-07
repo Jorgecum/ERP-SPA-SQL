@@ -165,7 +165,6 @@ async function renderVentas(c) {
         </div>
     `;
     
-    // Set up real-time search and filter listeners
     const searchInput = document.getElementById('s-search');
     if (searchInput) {
         searchInput.value = state.salesFilter.search;
@@ -184,7 +183,6 @@ async function renderVentas(c) {
         });
     }
 
-    // Initialize tooltips if tippy is loaded
     setTimeout(() => {
         if(window.tippy) {
             tippy('.tooltip-btn', {

@@ -313,8 +313,19 @@
 
 
         async getPurchaseOrders() {
-            await delay(50);
-            return JSON.parse(JSON.stringify(MOCK_DB.purchaseOrders));
+            try {
+                const response = await fetch('CompraController?action=listarOrdenes');
+
+                if(!response.ok){
+                    throw new Error(`Error en el servidor: ${response.status}`);
+                }
+
+                return await response.json();
+
+            } catch (error) {
+                console.error('Error fetching ordenes de compra:', e);
+                return[];
+            }
         },
         
         async savePurchaseOrder(oc) {

@@ -4,7 +4,7 @@ import java.sql.Date;
 import java.util.List;
 
 public class OrdenCompraDTO {
-    private int idOrden;
+    private Integer idOrden;
     private EntidadesDTO proveedor;
     private EntidadesDTO usuario;
     private Date fecha;
@@ -17,13 +17,7 @@ public class OrdenCompraDTO {
     public OrdenCompraDTO() {
     }
 
-    public int getIdOrden() {
-        return idOrden;
-    }
-
-    public void setIdOrden(int idOrden) {
-        this.idOrden = idOrden;
-    }
+    
 
     public EntidadesDTO getProveedor() {
         return proveedor;
@@ -79,6 +73,18 @@ public class OrdenCompraDTO {
 
     public void setDetalles(List<DetalleOrdenDTO> detalles) {
         this.detalles = detalles;
+    }
+
+
+
+    public Integer getIdOrden() {
+        return idOrden;
+    }
+
+
+
+    public void setIdOrden(Integer idOrden) {
+        this.idOrden = idOrden;
     }
 
     

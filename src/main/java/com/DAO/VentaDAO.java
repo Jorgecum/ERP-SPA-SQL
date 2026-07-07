@@ -478,7 +478,7 @@ public class VentaDAO {
                     FROM ventas V
                     INNER JOIN entidades EN ON V.id_cliente = EN.id_entidad
                     INNER JOIN estados_sistema EST_V ON V.id_estado_venta = EST_V.id_estado  
-                    WHERE EXISTS (SELECT 1 FROM cuotas C WHERE C.id_venta = V.id_venta)      
+                    WHERE EXISTS (SELECT 1 FROM cuotas C WHERE C.id_venta = V.id_venta)         
                     ORDER BY V.id_venta DESC;
                 """;
         try {

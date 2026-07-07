@@ -1,5 +1,4 @@
 
-
 function posNewSale() {
     state.cart = [];
     state.globalDiscount = 0;

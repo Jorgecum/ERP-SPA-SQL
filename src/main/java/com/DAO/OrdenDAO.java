@@ -104,7 +104,7 @@ public class OrdenDAO {
     }
 
     @SuppressWarnings("unchecked")
-    public List<OrdenCompraDTO> listarOrdenes(){
+    public List<OrdenCompraDTO> listarOrdenesPendientes(){
        EntityManager em = emf.createEntityManager();
        List<OrdenCompraDTO> lista = new ArrayList<>();
        String sql = """
@@ -189,6 +189,50 @@ public class OrdenDAO {
         }
 
         return orden;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public List<OrdenCompraDTO> listarTodasLasOrdenes() {
+        EntityManager em = emf.createEntityManager();
+        List<OrdenCompraDTO> lista = new ArrayList<>();
+        String sql = """
+                SELECT 
+                    O.id_orden,
+                    O.fecha,
+                    O.total_estimado,
+                    ESTADO.nombre,
+                    E.nombre_razon_social
+                FROM ordenes_compra AS O
+                INNER JOIN entidades AS E ON O.id_proveedor = E.id_entidad
+                INNER JOIN estados_sistema AS ESTADO ON O.id_estado_orden = ESTADO.id_estado
+                """; 
+        try {
+            Query query = em.createNativeQuery(sql);
+            List<Object[]> resultado = query.getResultList();
+
+            for (Object[] fila : resultado) {
+                OrdenCompraDTO orden = new OrdenCompraDTO();
+                EntidadesDTO entidad = new EntidadesDTO();
+
+                orden.setIdOrden(((Number) fila[0]).intValue());
+                orden.setFecha((Date) fila[1]);
+                orden.setTotalEstimado(((Number) fila[2]).doubleValue());
+                EstadosSistemaDTO estado = new EstadosSistemaDTO();
+                estado.setNombreEstado((String)fila[3]);
+                orden.setEstado(estado);
+
+                entidad.setNombre_RazonSocial((String) fila[4]);
+                orden.setProveedor(entidad);
+
+                lista.add(orden);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            em.close();
+        }
+
+        return lista;
     }
 
 }

@@ -39,9 +39,9 @@ public class CompraController extends HttpServlet {
         try {
             out = response.getWriter();
             
-            if(accion.equals("listarOrden")){
-                List<OrdenCompraDTO> listaOrden = ordenDAO.listarOrdenes();
-                out.print(gson.toJson(listaOrden));
+            if(accion.equals("listarOrdenes")){
+                List<OrdenCompraDTO> listTotalOrdenes = ordenDAO.listarTodasLasOrdenes();
+                out.print(gson.toJson(listTotalOrdenes));
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 out.print("{\"error\":\"Acción GET no válida en Compras\"}");
