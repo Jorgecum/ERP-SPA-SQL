@@ -488,19 +488,12 @@
                             const unidadNombre = p.unidad?.nombre || 'Unid';
                             return `
                                 <tr>
-<<<<<<< HEAD
                                     <td class="p-3 font-mono text-[#F8FAFC]">${p.codigo_unico || p.codigo_barras || p.id_producto}</td>
                                     <td class="p-3 font-bold text-[#F8FAFC]">${p.nombre_descripcion}</td>
                                     <td class="p-3 text-[#CBD5E1]">${p.categoria?.nombreCategoria || '-'}</td>
                                     <td class="p-3 font-bold ${p.stock <= p.stock_minimo ? 'text-red-400':'text-[#F8FAFC]'}">${p.stock} ${p.unidad?.nombre || ''}</td>
                                     <td class="p-3 text-[#CBD5E1]">${p.stock_minimo} ${p.unidad?.nombre || ''}</td>
-=======
-                                    <td class="p-3 font-mono text-[#F8FAFC]">${p.codigo_unico}</td>
-                                    <td class="p-3 font-bold text-[#F8FAFC]">${p.nombre_descripcion}</td>
-                                    <td class="p-3 text-[#CBD5E1]">${p.categoria?.nombreCategoria || 'General'}</td>
-                                    <td class="p-3 font-bold ${p.stock <= p.stock_minimo ? 'text-red-400':'text-[#F8FAFC]'}">${p.stock} ${unidadNombre}</td>
-                                    <td class="p-3 text-[#CBD5E1]">${p.stock_minimo} ${unidadNombre}</td>
->>>>>>> 7bab5fe (Actualizacion del Dash)
+
                                     <td class="p-3">
                                         <span class="inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${statusText}</span>
                                     </td>
