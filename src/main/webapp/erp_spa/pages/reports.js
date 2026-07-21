@@ -238,7 +238,7 @@
                             const cName = s.cliente?.nombre_RazonSocial || 'Cliente Mostrador';
                             const estadoVenta = s.estado?.nombreEstado || 'Activo';
                             return `
-                                <tr class="hover:bg-[#111827]/40 transition-colors">
+                          <tr class="hover:bg-[#111827]/40 transition-colors">
                                     <td class="p-3 text-[#F8FAFC]">${s.fecha_emision}</td>
                                     <td class="p-3 text-[#CBD5E1]">${s.tipo_comprobante}</td>
                                     <td class="p-3 font-mono text-[#CBD5E1]">${s.serie_correlativa}</td>
